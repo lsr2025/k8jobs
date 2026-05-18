@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>K8Jobs — Career Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --cream:    #EAE5D9;
+  --cream-dk: #D8D2C4;
+  --cream-lt: #F2EEE6;
+  --surface:  #F6F2EB;
+  --navy:     #0D1B2A;
+  --navy-dim: rgba(13,27,42,0.06);
+  --navy-md:  rgba(13,27,42,0.12);
+  --line:     rgba(13,27,42,0.1);
+  --gold:     #B89A3E;
+  --gold-dim: rgba(184,154,62,0.13);
+  --ink:      #1A1917;
+  --ink-md:   #3D3A35;
+  --ink-lt:   #6B6455;
+  --ink-ft:   #9A9188;
+  --green:    #2D6A4F;
+  --green-bg: rgba(45,106,79,0.08);
+  --warn:     #8B5E3C;
+  --warn-bg:  rgba(139,94,60,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;height:100%}
+body{
+  font-family:'Jost',sans-serif;background:var(--cream);color:var(--ink);
+  -webkit-font-smoothing:antialiased;min-height:100%;overflow-x:hidden;
+}
+
+/* ── GRAIN TEXTURE ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:0.4;
+}
+
+.app{display:flex;min-height:100vh;min-height:100dvh;position:relative;z-index:1}
+
+/* ── OVERLAY ── */
+#overlay{
+  display:none;position:fixed;inset:0;background:rgba(13,27,42,0.55);
+  z-index:60;backdrop-filter:blur(3px);transition:opacity 0.25s;
+}
+#overlay.show{display:block}
+
+/* ── SIDEBAR ── */
+#sidebar{
+  width:240px;min-height:100vh;min-height:100dvh;
+  background:var(--navy);display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;z-index:70;
+  transform:translateX(-100%);transition:transform 0.3s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+}
+#sidebar.open{transform:translateX(0)}
+@media(min-width:768px){
+  #sidebar{transform:translateX(0)!important}
+  #overlay{display:none!important}
+}
+
+.sb-logo{
+  padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,0.07);
+  display:flex;align-items:flex-start;justify-content:space-between;
+}
+.logo-k8{
+  font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;
+  color:var(--cream);letter-spacing:-1.5px;line-height:1;
+}
+.logo-k8 sup{
+  font-family:'Jost',sans-serif;font-size:8px;font-weight:600;
+  letter-spacing:3px;text-transform:uppercase;color:var(--gold);vertical-align:super;
+}
+.logo-sub{font-size:8px;letter-spacing:4px;text-transform:uppercase;color:rgba(234,229,217,0.28);margin-top:3px}
+.sb-close{
+  background:none;border:none;color:rgba(234,229,217,0.3);font-size:20px;
+  cursor:pointer;padding:4px;line-height:1;display:none;
+}
+@media(max-width:767px){.sb-close{display:block}}
+
+.sb-user{padding:14px 24px;border-bottom:1px solid rgba(255,255,255,0.07)}
+.sb-avatar{
+  width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--cream);margin-bottom:8px;
+}
+.sb-name{font-size:12px;font-weight:500;color:var(--cream);margin-bottom:4px;letter-spacing:0.2px}
+.sb-plan{
+  display:inline-block;font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(184,154,62,0.3);padding:2px 8px;border-radius:2px;
+}
+
+.sb-nav{flex:1;padding:16px 12px;overflow-y:auto}
+.nav-section{
+  font-size:8px;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(234,229,217,0.2);padding:0 12px;margin:18px 0 6px;
+}
+.nav-btn{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:4px;
+  cursor:pointer;color:rgba(234,229,217,0.4);font-size:12px;font-weight:400;
+  letter-spacing:0.3px;transition:all 0.15s;margin-bottom:1px;
+  border:none;background:none;width:100%;text-align:left;font-family:'Jost',sans-serif;
+  min-height:44px;
+}
+.nav-btn:hover{color:var(--cream);background:rgba(255,255,255,0.05)}
+.nav-btn.active{color:var(--cream);background:rgba(255,255,255,0.08)}
+.nav-btn.active .nav-dot{background:var(--gold)}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:rgba(234,229,217,0.15);flex-shrink:0;transition:background 0.15s}
+.nav-badge{
+  margin-left:auto;font-size:9px;font-weight:600;color:var(--gold);
+  background:rgba(184,154,62,0.15);padding:2px 7px;border-radius:2px;letter-spacing:0.5px;
+}
+
+.sb-bottom{padding:16px 24px;border-top:1px solid rgba(255,255,255,0.07)}
+.beta-row{display:flex;align-items:center;gap:8px}
+.beta-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0}
+.beta-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(234,229,217,0.25)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* ── MAIN ── */
+#main{
+  flex:1;margin-left:0;min-height:100vh;min-height:100dvh;
+  padding-bottom:72px;display:flex;flex-direction:column;
+}
+@media(min-width:768px){#main{margin-left:240px;padding-bottom:0}}
+
+/* ── TOPBAR ── */
+#topbar{
+  height:56px;border-bottom:1px solid var(--line);display:flex;
+  align-items:center;justify-content:space-between;padding:0 18px;
+  background:rgba(234,229,217,0.9);backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:40;
+}
+@media(min-width:768px){#topbar{height:60px;padding:0 36px}}
+.tb-left{display:flex;align-items:center;gap:14px}
+.hamburger{
+  background:none;border:none;cursor:pointer;display:flex;
+  flex-direction:column;gap:5px;padding:6px;
+}
+.hamburger span{display:block;width:19px;height:1.5px;background:var(--ink);border-radius:1px;transition:all 0.2s}
+@media(min-width:768px){.hamburger{display:none}}
+.tb-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;color:var(--ink)}
+@media(min-width:768px){.tb-title{font-size:21px}}
+.tb-title em{font-style:italic;color:var(--gold)}
+.tb-actions{display:flex;align-items:center;gap:8px}
+.btn-p{
+  background:var(--navy);color:var(--cream);border:none;padding:9px 16px;
+  border-radius:3px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+  cursor:pointer;font-family:'Jost',sans-serif;font-weight:500;transition:background 0.15s;
+  min-height:40px;white-space:nowrap;
+}
+.btn-p:hover{background:var(--ink-md)}
+.btn-o{
+  background:transparent;color:var(--ink-lt);border:1px solid var(--line);
+  padding:9px 14px;border-radius:3px;font-size:10px;letter-spacing:1.5px;
+  text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;
+  font-weight:500;transition:all 0.15s;min-height:40px;white-space:nowrap;
+}
+.btn-o:hover{border-color:var(--ink);color:var(--ink)}
+.hide-sm{display:none}
+@media(min-width:480px){.hide-sm{display:flex;align-items:center}}
+
+/* ── BOTTOM NAV ── */
+#bottom-nav{
+  display:flex;position:fixed;bottom:0;left:0;right:0;
+  background:var(--navy);border-top:1px solid rgba(255,255,255,0.07);
+  z-index:50;padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media(min-width:768px){#bottom-nav{display:none}}
+.bn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:9px 4px;cursor:pointer;border:none;background:none;
+  color:rgba(234,229,217,0.3);transition:color 0.15s;min-height:56px;
+  font-family:'Jost',sans-serif;
+}
+.bn.active{color:var(--gold)}
+.bn-icon{font-size:17px;margin-bottom:3px;line-height:1}
+.bn-label{font-size:8px;letter-spacing:0.5px;font-weight:500;text-transform:uppercase}
+
+/* ── PAGE SYSTEM ── */
+.page{display:none;padding:20px 16px 28px;animation:fadeUp 0.3s ease both}
+.page.active{display:block}
+@media(min-width:768px){.page{padding:32px 36px;max-width:1160px}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LAYOUT HELPERS ── */
+.two-col{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:900px){.two-col{grid-template-columns:1fr 300px;gap:20px}}
+.three-col{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:600px){.three-col{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.three-col{grid-template-columns:1fr 1fr 1fr}}
+
+/* ── STATS GRID ── */
+.stats{
+  display:grid;grid-template-columns:1fr 1fr;
+  background:var(--line);border:1px solid var(--line);
+  border-radius:4px;overflow:hidden;gap:1px;margin-bottom:20px;
+}
+@media(min-width:600px){.stats{grid-template-columns:repeat(4,1fr);margin-bottom:28px}}
+.stat{background:var(--surface);padding:16px 14px 12px}
+@media(min-width:768px){.stat{padding:22px 20px 18px}}
+.stat-lbl{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--ink-ft);margin-bottom:8px}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--ink);line-height:1;margin-bottom:6px}
+@media(min-width:600px){.stat-num{font-size:42px}}
+.stat-delta{font-size:10px;color:var(--ink-lt)}
+.stat-delta.up{color:var(--green)}
+.stat-delta.warn{color:var(--warn)}
+
+/* ── PANEL ── */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:20px;margin-bottom:16px;transition:box-shadow 0.2s}
+@media(min-width:768px){.panel{padding:26px;margin-bottom:20px}}
+.panel:hover{box-shadow:0 4px 24px rgba(13,27,42,0.06)}
+.ph{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.pt{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;color:var(--ink)}
+.ps{font-size:11px;color:var(--ink-ft);margin-top:2px}
+.pa{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-lt);cursor:pointer;border:none;background:none;font-family:'Jost',sans-serif;transition:color 0.15s}
+.pa:hover{color:var(--ink)}
+
+/* ── CHIPS ── */
+.chip{display:inline-block;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:2px;font-weight:500}
+.chip-g{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(184,154,62,0.2)}
+.chip-grn{background:var(--green-bg);color:var(--green)}
+.chip-n{background:var(--navy-dim);color:var(--ink-md)}
+.chip-w{background:var(--warn-bg);color:var(--warn)}
+
+/* ── JOB ROW ── */
+.job-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:padding-left 0.15s}
+.job-row:last-child{border-bottom:none}
+.job-row:hover{padding-left:6px}
+.jt{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:3px}
+.jm{font-size:11px;color:var(--ink-ft)}
+.match{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--ink-md);flex-shrink:0;margin-left:10px}
+
+/* ── INTERVIEW CARD ── */
+.int-card{border:1px solid rgba(45,106,79,0.25);border-radius:4px;padding:20px;background:var(--green-bg);margin-bottom:16px;position:relative;overflow:hidden}
+.int-card::before{content:'';position:absolute;top:0;right:0;width:100px;height:100px;background:radial-gradient(circle,rgba(45,106,79,0.12),transparent 70%);pointer-events:none}
+.int-eyebrow{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:8px}
+.int-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;color:var(--ink);margin-bottom:4px;line-height:1.3}
+.int-sub{font-size:11px;color:var(--ink-lt);margin-bottom:16px;line-height:1.5}
+
+/* ── CV HEALTH ── */
+.cv-block{display:flex;align-items:center;gap:16px;padding:18px;background:var(--cream-lt);border:1px solid var(--line);border-radius:4px;margin-bottom:16px}
+.cv-num{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;color:var(--ink);line-height:1;flex-shrink:0}
+.cv-lbl{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:2px}
+.cv-sub{font-size:11px;color:var(--ink-ft)}
+.cv-tip{font-size:12px;color:var(--ink-lt);padding:9px 0;border-bottom:1px solid var(--line);line-height:1.5}
+.cv-tip:last-child{border-bottom:none}
+.cv-tip strong{color:var(--ink);font-weight:600}
+
+/* ── KANBAN ── */
+.kanban-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -20px;padding:0 20px 12px}
+@media(min-width:768px){.kanban-scroll{margin:0;padding:0;overflow:visible}}
+.kanban{display:grid;grid-template-columns:repeat(5,190px);gap:10px;width:max-content}
+@media(min-width:900px){.kanban{grid-template-columns:repeat(5,1fr);width:auto;gap:12px}}
+.k-col{background:var(--cream-lt);border:1px solid var(--line);border-radius:4px;padding:14px;min-height:140px}
+.k-head{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-ft);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.k-count{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;color:var(--ink-lt)}
+.k-card{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:11px;margin-bottom:7px;cursor:pointer;transition:all 0.15s}
+.k-card:hover{border-color:rgba(13,27,42,0.22);box-shadow:0 2px 8px rgba(13,27,42,0.06)}
+.k-ct{font-size:11px;font-weight:500;color:var(--ink);margin-bottom:3px;line-height:1.3}
+.k-cc{font-size:10px;color:var(--ink-ft);margin-bottom:7px}
+.k-cf{display:flex;justify-content:space-between;align-items:center}
+.k-src{font-size:10px;font-weight:500;color:var(--gold)}
+.k-dt{font-size:10px;color:var(--ink-ft)}
+
+/* ── LEAD ROW ── */
+.lead-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:padding-left 0.15s}
+.lead-row:last-child{border-bottom:none}
+.lead-row:hover{padding-left:6px}
+.lead-ico{width:34px;height:34px;background:var(--cream-dk);border:1px solid var(--line);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;margin-right:12px}
+.lead-nm{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:2px}
+.lead-sc{font-size:11px;color:var(--ink-ft)}
+.lead-rt{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+/* ── PLATFORM CARDS ── */
+.plat-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:20px}
+@media(min-width:600px){.plat-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.plat-grid{grid-template-columns:repeat(3,1fr);margin-bottom:26px}}
+.plat-card{border:1px solid var(--line);border-radius:4px;padding:22px;background:var(--surface);cursor:pointer;transition:all 0.2s}
+.plat-card:hover{border-color:rgba(13,27,42,0.22);box-shadow:0 6px 24px rgba(13,27,42,0.07);transform:translateY(-2px)}
+.plat-icon{font-size:26px;margin-bottom:12px}
+.plat-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;color:var(--ink);margin-bottom:6px}
+.plat-desc{font-size:12px;color:var(--ink-lt);line-height:1.6;margin-bottom:16px}
+.plat-bar-row{display:flex;align-items:center;gap:10px}
+.plat-bar{flex:1;height:2px;background:var(--cream-dk);border-radius:1px;overflow:hidden}
+.plat-fill{height:100%;border-radius:1px;background:var(--gold);transition:width 1s ease}
+.plat-pct{font-size:12px;color:var(--ink-lt);font-weight:500;width:28px;text-align:right}
+
+/* ── CONTENT ITEMS ── */
+.ci{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:padding-left 0.15s}
+.ci:last-child{border-bottom:none}
+.ci:hover{padding-left:5px}
+.ci-ico{width:28px;height:28px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
+.c-li{background:rgba(10,102,194,0.1)}
+.c-ss{background:rgba(255,104,0,0.1)}
+.c-tt{background:rgba(254,44,85,0.1)}
+.ci-t{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:3px;line-height:1.4}
+.ci-m{font-size:11px;color:var(--ink-ft)}
+
+/* ── FILTERS ── */
+.filters{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;margin-bottom:18px;width:100%}
+@media(min-width:480px){.filters{width:fit-content}}
+.fb{
+  flex:1;padding:9px 12px;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;
+  border:none;cursor:pointer;font-family:'Jost',sans-serif;font-weight:500;
+  transition:all 0.15s;border-right:1px solid var(--line);min-height:40px;
+}
+@media(min-width:480px){.fb{flex:none;padding:9px 16px;font-size:9px}}
+.fb:last-child{border-right:none}
+.fb.active{background:var(--navy);color:var(--cream)}
+.fb:not(.active){background:var(--surface);color:var(--ink-lt)}
+.fb:not(.active):hover{background:var(--cream-dk);color:var(--ink)}
+
+/* ── INPUT ── */
+.inp{
+  width:100%;background:var(--cream-lt);border:1px solid var(--line);border-radius:3px;
+  padding:11px 14px;color:var(--ink);font-size:14px;font-family:'Jost',sans-serif;
+  outline:none;transition:border 0.15s;-webkit-appearance:none;
+}
+.inp:focus{border-color:var(--ink)}
+.inp::placeholder{color:var(--ink-ft)}
+.lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-ft);margin-bottom:6px;display:block}
+.form-row{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:14px}
+@media(min-width:480px){.form-row{grid-template-columns:1fr 1fr}}
+
+/* ── ADVISORY ── */
+.adv-block{background:var(--navy);border-radius:4px;padding:24px;margin-bottom:18px;position:relative;overflow:hidden}
+@media(min-width:768px){.adv-block{padding:36px}}
+.adv-block::after{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(184,154,62,0.1),transparent 70%);pointer-events:none}
+.adv-eye{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.adv-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:var(--cream);margin-bottom:12px;letter-spacing:-0.3px;line-height:1.2}
+@media(min-width:768px){.adv-title{font-size:34px}}
+.adv-body{font-size:13px;color:rgba(234,229,217,0.55);line-height:1.7;margin-bottom:20px}
+.adv-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:24px}
+.adv-tag{font-size:9px;letter-spacing:1px;padding:5px 12px;border-radius:2px;border:1px solid rgba(184,154,62,0.25);color:rgba(234,229,217,0.55)}
+.btn-cream{background:var(--cream);color:var(--navy);border:none;padding:12px 24px;border-radius:3px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;font-weight:600;min-height:44px;transition:background 0.15s}
+.btn-cream:hover{background:var(--cream-lt)}
+
+/* ── PROFILE ── */
+.prof-banner{display:flex;align-items:flex-start;gap:18px;padding:22px;background:var(--surface);border:1px solid var(--line);border-radius:4px;margin-bottom:18px}
+@media(min-width:600px){.prof-banner{align-items:center;gap:24px;padding:26px}}
+.prof-av{width:60px;height:60px;border-radius:50%;border:1px solid var(--line);background:var(--cream-dk);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--ink);flex-shrink:0}
+@media(min-width:600px){.prof-av{width:68px;height:68px;font-size:24px}}
+.prof-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--ink);margin-bottom:4px}
+@media(min-width:600px){.prof-name{font-size:26px}}
+.prof-role{font-size:11px;color:var(--ink-lt);margin-bottom:12px;letter-spacing:0.3px}
+.prof-tags{display:flex;flex-wrap:wrap;gap:6px}
+.prof-tag{font-size:9px;padding:4px 10px;border-radius:2px;border:1px solid var(--line);color:var(--ink-lt)}
+
+/* ── UPGRADE BAR ── */
+.upgrade-bar{border:1px solid rgba(184,154,62,0.3);border-radius:4px;padding:16px 18px;background:var(--gold-dim);display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+@media(min-width:600px){.upgrade-bar{flex-direction:row;align-items:center;justify-content:space-between;gap:0;margin-bottom:26px}}
+.up-t{font-size:13px;font-weight:500;color:var(--ink)}
+.up-s{font-size:11px;color:var(--ink-ft);margin-top:2px}
+
+/* ── ACTIVITY ── */
+.act-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.act-item:last-child{border-bottom:none}
+.act-dot{width:7px;height:7px;border-radius:50%;border:1px solid var(--line);background:var(--cream);flex-shrink:0;margin-top:4px}
+.act-dot.on{background:var(--gold);border-color:var(--gold)}
+.act-t{font-size:12px;color:var(--ink);margin-bottom:2px}
+.act-d{font-size:10px;color:var(--ink-ft)}
+
+/* ── PREP ── */
+.prep-meta{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:20px;margin-bottom:18px}
+@media(min-width:600px){.prep-meta{display:flex;gap:24px;align-items:center}}
+.prep-score{text-align:center;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+@media(min-width:600px){.prep-score{padding-bottom:0;margin-bottom:0;border-bottom:none;border-right:1px solid var(--line);padding-right:24px;flex-shrink:0}}
+.prep-num{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;color:var(--ink);line-height:1}
+.prep-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-ft);margin-top:4px}
+.q-block{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.q-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.q-num{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:var(--ink-ft);flex-shrink:0;line-height:1}
+.q-text{font-size:14px;font-weight:500;color:var(--ink);line-height:1.5;margin-bottom:10px}
+.q-tip{border-left:2px solid var(--gold);padding:9px 14px;background:var(--gold-dim);font-size:12px;color:var(--ink-lt);line-height:1.6}
+
+/* ── DOWNLOAD BUTTONS ── */
+.dl-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.dl-btn{
+  display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:3px;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink-lt);
+  cursor:pointer;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:1.5px;
+  text-transform:uppercase;font-weight:500;transition:all 0.2s;min-height:38px;
+}
+.dl-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--cream-dk)}
+.dl-btn.pdf{border-color:rgba(184,154,62,0.3);color:var(--gold);background:var(--gold-dim)}
+.dl-btn.pdf:hover{background:rgba(184,154,62,0.2);border-color:var(--gold)}
+.dl-btn.word{border-color:rgba(13,27,42,0.2);color:var(--navy);background:rgba(13,27,42,0.05)}
+.dl-btn.word:hover{background:rgba(13,27,42,0.1)}
+.dl-btn.downloading{opacity:0.6;cursor:wait}
+.dl-icon{font-size:12px}
+
+/* ── PRICING ── */
+.pricing-hero{text-align:center;padding:28px 0 32px}
+.pricing-tag{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.pricing-title{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--ink);margin-bottom:10px;letter-spacing:-0.5px}
+@media(min-width:600px){.pricing-title{font-size:44px}}
+.pricing-sub{font-size:13px;color:var(--ink-lt);max-width:480px;margin:0 auto;line-height:1.6}
+
+.pricing-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:28px}
+@media(min-width:480px){.pricing-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.pricing-grid{grid-template-columns:repeat(4,1fr)}}
+
+.tier{border:1px solid var(--line);border-radius:4px;padding:24px;background:var(--surface);position:relative;transition:all 0.2s}
+.tier:hover{box-shadow:0 8px 32px rgba(13,27,42,0.08);transform:translateY(-2px)}
+.tier.recommended{border-color:var(--navy);background:var(--navy)}
+.tier.recommended *{color:var(--cream)}
+.tier.recommended .tier-price{color:var(--gold)}
+.tier.recommended .tier-feat{border-color:rgba(255,255,255,0.1)}
+.tier.recommended .tier-feat::before{color:var(--gold)}
+.rec-badge{
+  position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  background:var(--gold);color:var(--navy);font-size:8px;letter-spacing:2px;
+  text-transform:uppercase;padding:4px 14px;border-radius:0 0 4px 4px;font-weight:700;
+  white-space:nowrap;
+}
+.tier-eye{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-ft);margin-bottom:12px;margin-top:10px}
+.tier.recommended .tier-eye{color:rgba(234,229,217,0.45)}
+.tier-price{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;color:var(--ink);line-height:1;margin-bottom:4px}
+.tier-period{font-size:11px;color:var(--ink-ft);margin-bottom:18px}
+.tier.recommended .tier-period{color:rgba(234,229,217,0.45)}
+.tier-feats{border-top:1px solid var(--line);padding-top:16px;margin-bottom:20px}
+.tier-feat{font-size:12px;color:var(--ink-lt);padding:7px 0;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:8px;line-height:1.4}
+.tier-feat:last-child{border-bottom:none}
+.tier-feat::before{content:'—';color:var(--gold);font-size:11px;flex-shrink:0;margin-top:1px}
+.tier.recommended .tier-feat{color:rgba(234,229,217,0.7)}
+.tier-cta{width:100%;padding:11px;border-radius:3px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;font-weight:600;transition:all 0.15s;min-height:44px}
+.tier:not(.recommended) .tier-cta{background:transparent;color:var(--ink);border:1px solid var(--navy-md)}
+.tier:not(.recommended) .tier-cta:hover{background:var(--navy);color:var(--cream);border-color:var(--navy)}
+.tier.recommended .tier-cta{background:var(--gold);color:var(--navy);border:none}
+.tier.recommended .tier-cta:hover{background:#D4AF52}
+
+.bundles-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--ink);margin-bottom:16px;padding-top:8px}
+.bundle-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:28px}
+@media(min-width:600px){.bundle-grid{grid-template-columns:1fr 1fr}}
+.bundle{border:1px solid var(--line);border-radius:4px;padding:20px;background:var(--surface);display:flex;justify-content:space-between;align-items:center;transition:all 0.15s}
+.bundle:hover{border-color:rgba(13,27,42,0.22);box-shadow:0 4px 16px rgba(13,27,42,0.06)}
+.bun-name{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.bun-inc{font-size:11px;color:var(--ink-ft);line-height:1.5}
+.bun-price{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--ink);text-align:right;flex-shrink:0;margin-left:12px}
+.bun-once{font-size:9px;color:var(--ink-ft);letter-spacing:1px;text-align:right}
+
+.advisory-pricing{background:var(--navy);border-radius:4px;padding:22px 24px;margin-bottom:4px}
+.ap-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;color:var(--cream);margin-bottom:4px}
+.ap-sub{font-size:12px;color:rgba(234,229,217,0.45);margin-bottom:16px}
+.ap-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(min-width:600px){.ap-grid{grid-template-columns:repeat(4,1fr)}}
+.ap-item{background:rgba(255,255,255,0.05);border-radius:3px;padding:12px 10px}
+.ap-service{font-size:10px;color:rgba(234,229,217,0.5);margin-bottom:6px;letter-spacing:0.3px}
+.ap-price{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:var(--gold)}
+.ap-note{font-size:9px;color:rgba(234,229,217,0.3);margin-top:12px;letter-spacing:0.5px}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- OVERLAY -->
+  <div id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sb-logo">
+      <div>
+        <div class="logo-k8">k8<sup>group</sup></div>
+        <div class="logo-sub">Career Platform</div>
+      </div>
+      <button class="sb-close" onclick="closeSidebar()">✕</button>
+    </div>
+    <div class="sb-user">
+      <div class="sb-avatar">NB</div>
+      <div class="sb-name">Ncamisile Buthelezi</div>
+      <div class="sb-plan">Free Plan</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-section">Main</div>
+      <button class="nav-btn active" data-page="dashboard" onclick="go('dashboard')"><div class="nav-dot"></div>Dashboard</button>
+      <button class="nav-btn" data-page="pipeline" onclick="go('pipeline')"><div class="nav-dot"></div>Job Pipeline<span class="nav-badge">4</span></button>
+      <button class="nav-btn" data-page="leads" onclick="go('leads')"><div class="nav-dot"></div>Cold Leads<span class="nav-badge">5</span></button>
+      <div class="nav-section">Prepare</div>
+      <button class="nav-btn" data-page="prep" onclick="go('prep')"><div class="nav-dot"></div>Interview Prep<span class="nav-badge">1</span></button>
+      <button class="nav-btn" data-page="brand" onclick="go('brand')"><div class="nav-dot"></div>Brand Builder</button>
+      <div class="nav-section">Account</div>
+      <button class="nav-btn" data-page="profile" onclick="go('profile')"><div class="nav-dot"></div>My Profile</button>
+      <button class="nav-btn" data-page="pricing" onclick="go('pricing')"><div class="nav-dot"></div>Pricing</button>
+      <button class="nav-btn" data-page="advisory" onclick="go('advisory')"><div class="nav-dot"></div>The Advisory Office</button>
+    </nav>
+    <div class="sb-bottom">
+      <div class="beta-row">
+        <div class="beta-dot"></div>
+        <div class="beta-label">Beta · Protected · 2026</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main id="main">
+    <!-- TOPBAR -->
+    <div id="topbar">
+      <div class="tb-left">
+        <button class="hamburger" onclick="openSidebar()" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="tb-title" id="tb-title">Good morning, <em>Ncamisile</em></div>
+      </div>
+      <div class="tb-actions">
+        <button class="btn-o hide-sm">Upload CV</button>
+        <button class="btn-p">+ Add</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════ DASHBOARD ═══════════════ -->
+    <section class="page active" id="page-dashboard">
+      <div class="upgrade-bar">
+        <div>
+          <div class="up-t">Upgrade to Pro — Cold Leads, Brand Builder &amp; Advisory referral</div>
+          <div class="up-s">Let K8Jobs work while you prepare for Monday.</div>
+        </div>
+        <button class="btn-p" onclick="go('pricing')">View Plans</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-lbl">CV Score</div><div class="stat-num">74</div><div class="stat-delta up">↑ 3 pts this week</div></div>
+        <div class="stat"><div class="stat-lbl">Matched Jobs</div><div class="stat-num">12</div><div class="stat-delta up">2 new today</div></div>
+        <div class="stat"><div class="stat-lbl">Applications</div><div class="stat-num">4</div><div class="stat-delta up">1 interview booked</div></div>
+        <div class="stat"><div class="stat-lbl">Interview</div><div class="stat-num">Mon</div><div class="stat-delta warn">11:00 · Mtubatuba</div></div>
+      </div>
+      <div class="two-col">
+        <div>
+          <div class="int-card">
+            <div class="int-eyebrow">Interview Confirmed</div>
+            <div class="int-title">SMME Officer — UMhlosinga Development Agency</div>
+            <div class="int-sub">Monday at 11:00 · Lot 5/202, Jan Smuts Ave &amp; Aloe St, Mtubatuba · Ms. Thembisile Khumalo</div>
+            <button class="btn-p" onclick="go('prep')">Open Prep Pack</button>
+          </div>
+          <div class="panel">
+            <div class="ph">
+              <div><div class="pt">Top Job Matches</div><div class="ps">DPSA · SEDA · LinkedIn · PNet · CareerJunction</div></div>
+              <button class="pa" onclick="go('pipeline')">All →</button>
+            </div>
+            <div class="job-row"><div><div class="jt">Enterprise Development Officer</div><div class="jm">KZN EDTEA — Pietermaritzburg · DPSA</div></div><div class="match">92%</div></div>
+            <div class="job-row"><div><div class="jt">Business Advisor</div><div class="jm">SEDA KZN — Durban · SEDA</div></div><div class="match">90%</div></div>
+            <div class="job-row"><div><div class="jt">SMME Officer</div><div class="jm">UMDA — Mkuze Airport · UMDA</div></div><div class="match">88%</div></div>
+            <div class="job-row"><div><div class="jt">LED Officer</div><div class="jm">eThekwini Municipality · PNet</div></div><div class="match">84%</div></div>
+            <div class="job-row"><div><div class="jt">Programme Officer: SMME Support</div><div class="jm">SEFA KZN · LinkedIn</div></div><div class="match">82%</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel">
+            <div class="ph"><div class="pt">CV Health</div><span class="chip chip-n">3 tips</span></div>
+            <div class="cv-block">
+              <div class="cv-num">74</div>
+              <div><div class="cv-lbl">Good — improve to 85+</div><div class="cv-sub">Add metrics to unlock more matches</div></div>
+            </div>
+            <div class="cv-tip"><strong>Add outcomes</strong> — "80+ SMMEs" not "many SMMEs"</div>
+            <div class="cv-tip"><strong>LinkedIn URL</strong> — add to contact section</div>
+            <div class="cv-tip"><strong>Skills gap</strong> — add "Programme Reporting"</div>
+            <button class="btn-o" style="width:100%;margin-top:14px">Update CV</button>
+          </div>
+          <div class="panel">
+            <div class="ph"><div class="pt">Activity</div></div>
+            <div class="act-item"><div class="act-dot on"></div><div><div class="act-t">Interview confirmed — UMDA</div><div class="act-d">Today</div></div></div>
+            <div class="act-item"><div class="act-dot on"></div><div><div class="act-t">Cover letter sent — eThekwini</div><div class="act-d">2 days ago</div></div></div>
+            <div class="act-item"><div class="act-dot"></div><div><div class="act-t">New DPSA match found</div><div class="act-d">3 days ago</div></div></div>
+            <div class="act-item"><div class="act-dot"></div><div><div class="act-t">CV optimised by K8Jobs</div><div class="act-d">1 week ago</div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ PIPELINE ═══════════════ -->
+    <section class="page" id="page-pipeline">
+      <div class="stats" style="grid-template-columns:repeat(5,1fr);margin-bottom:18px">
+        <div class="stat" style="text-align:center;padding:12px 6px"><div class="stat-lbl" style="font-size:7px">Saved</div><div class="stat-num" style="font-size:28px">2</div></div>
+        <div class="stat" style="text-align:center;padding:12px 6px"><div class="stat-lbl" style="font-size:7px">Applied</div><div class="stat-num" style="font-size:28px">2</div></div>
+        <div class="stat" style="text-align:center;padding:12px 6px"><div class="stat-lbl" style="font-size:7px">Interview</div><div class="stat-num" style="font-size:28px;color:var(--green)">1</div></div>
+        <div class="stat" style="text-align:center;padding:12px 6px"><div class="stat-lbl" style="font-size:7px">Offer</div><div class="stat-num" style="font-size:28px">0</div></div>
+        <div class="stat" style="text-align:center;padding:12px 6px"><div class="stat-lbl" style="font-size:7px">Closed</div><div class="stat-num" style="font-size:28px">1</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph">
+          <div><div class="pt">Application Pipeline</div><div class="ps">Swipe to see all stages on mobile</div></div>
+          <button class="btn-p" style="padding:8px 14px;font-size:9px">+ Add</button>
+        </div>
+        <div class="kanban-scroll">
+          <div class="kanban">
+            <div class="k-col"><div class="k-head">Saved<span class="k-count">2</span></div>
+              <div class="k-card"><div class="k-ct">Enterprise Dev Officer</div><div class="k-cc">KZN EDTEA</div><div class="k-cf"><span class="k-src">DPSA</span></div></div>
+              <div class="k-card"><div class="k-ct">Business Advisor</div><div class="k-cc">SEDA KZN</div><div class="k-cf"><span class="k-src">SEDA</span></div></div>
+            </div>
+            <div class="k-col"><div class="k-head" style="color:var(--gold)">Applied<span class="k-count">2</span></div>
+              <div class="k-card"><div class="k-ct">SMME Officer</div><div class="k-cc">UMhlosinga Dev Agency</div><div class="k-cf"><span class="k-src">UMDA</span><span class="k-dt">30 Apr</span></div></div>
+              <div class="k-card"><div class="k-ct">LED Officer</div><div class="k-cc">eThekwini Municipality</div><div class="k-cf"><span class="k-src">PNet</span><span class="k-dt">15 May</span></div></div>
+            </div>
+            <div class="k-col"><div class="k-head" style="color:var(--green)">Interview<span class="k-count">1</span></div>
+              <div class="k-card" style="border-color:rgba(45,106,79,0.25)"><div class="k-ct">SMME Officer</div><div class="k-cc">UMDA — Mkuze Airport</div><div class="k-cf"><span class="k-src">UMDA</span><span class="k-dt">Mon 11am</span></div></div>
+            </div>
+            <div class="k-col"><div class="k-head">Offer<span class="k-count">0</span></div><div style="font-size:11px;color:var(--ink-ft);font-style:italic;padding-top:8px">—</div></div>
+            <div class="k-col"><div class="k-head">Closed<span class="k-count">1</span></div>
+              <div class="k-card" style="opacity:0.6"><div class="k-ct">Prog. Coordinator</div><div class="k-cc">IDC</div><div class="k-cf"><span class="k-src">LinkedIn</span><span class="k-dt">Feb</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ COLD LEADS ═══════════════ -->
+    <section class="page" id="page-leads">
+      <div class="filters">
+        <button class="fb active" onclick="filterLeads('all',this)">All (5)</button>
+        <button class="fb" onclick="filterLeads('watching',this)">Watching</button>
+        <button class="fb" onclick="filterLeads('reached',this)">Reached</button>
+        <button class="fb" onclick="filterLeads('warm',this)">Warm</button>
+      </div>
+      <div class="panel">
+        <div class="ph">
+          <div><div class="pt">Cold Leads</div><div class="ps">Companies you're watching before the job is posted</div></div>
+          <button class="btn-p" style="padding:8px 14px;font-size:9px">+ Add</button>
+        </div>
+        <div id="leads-list">
+          <div class="lead-row" data-status="watching"><div style="display:flex;align-items:center"><div class="lead-ico">🏭</div><div><div class="lead-nm">Richards Bay IDZ</div><div class="lead-sc">SEZ / Enterprise Development</div></div></div><div class="lead-rt"><span class="chip chip-n">watching</span><span style="font-size:10px;color:var(--ink-ft);display:none" class="lead-date">Follow up: Jun</span></div></div>
+          <div class="lead-row" data-status="watching"><div style="display:flex;align-items:center"><div class="lead-ico">✈️</div><div><div class="lead-nm">Dube TradePort</div><div class="lead-sc">Trade &amp; Logistics LED</div></div></div><div class="lead-rt"><span class="chip chip-n">watching</span></div></div>
+          <div class="lead-row" data-status="reached"><div style="display:flex;align-items:center"><div class="lead-ico">💰</div><div><div class="lead-nm">SEFA KZN Regional</div><div class="lead-sc">Development Finance</div></div></div><div class="lead-rt"><span class="chip chip-g">reached</span></div></div>
+          <div class="lead-row" data-status="warm"><div style="display:flex;align-items:center"><div class="lead-ico">🏛️</div><div><div class="lead-nm">KZN EDTEA</div><div class="lead-sc">Provincial Government LED</div></div></div><div class="lead-rt"><span class="chip chip-grn">warm</span></div></div>
+          <div class="lead-row" data-status="watching"><div style="display:flex;align-items:center"><div class="lead-ico">🌍</div><div><div class="lead-nm">Ithala Dev Finance</div><div class="lead-sc">Development Finance</div></div></div><div class="lead-rt"><span class="chip chip-n">watching</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ INTERVIEW PREP ═══════════════ -->
+    <section class="page" id="page-prep">
+      <div class="prep-meta">
+        <div class="prep-score">
+          <div class="prep-num">88</div>
+          <div class="prep-lbl">CV Match %</div>
+        </div>
+        <div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;color:var(--ink);margin-bottom:4px">SMME Officer · UMDA</div>
+          <div style="font-size:12px;color:var(--gold);margin-bottom:12px">Monday at 11:00 · Mkuze Airport, Mtubatuba</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="chip chip-grn">5+ yrs ✓</span>
+            <span class="chip chip-grn">CIPC ✓</span>
+            <span class="chip chip-grn">Code 10 ✓</span>
+            <span class="chip chip-grn">LED ✓</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="filters">
+        <button class="fb active" onclick="filterPrep('beh',this)">Behavioural</button>
+        <button class="fb" onclick="filterPrep('tech',this)">Technical</button>
+        <button class="fb" onclick="filterPrep('sit',this)">Situational</button>
+        <button class="fb" onclick="filterPrep('close',this)">Closing</button>
+      </div>
+
+      <div class="panel" id="prep-beh">
+        <div class="ph"><div class="pt">Behavioural Questions</div></div>
+        <div class="q-block"><div style="display:flex;gap:12px;margin-bottom:10px"><div class="q-num">01</div><div class="q-text">Tell us about yourself and why you are applying.</div></div><div class="q-tip">Open with impact, not your CV. "I've spent 5 years on the ground helping entrepreneurs formalise and grow — I want to do that at scale in uMkhanyakude." Lead with the result, not the story.</div></div>
+        <div class="q-block"><div style="display:flex;gap:12px;margin-bottom:10px"><div class="q-num">02</div><div class="q-text">Tell us about a time you helped an SMME access funding.</div></div><div class="q-tip">Have 2–3 real examples ready. Name the programme (SEFA, SEDA, DSBD). Walk through STAR: Situation → Task → Action → Result. Numbers make it real.</div></div>
+        <div class="q-block"><div style="display:flex;gap:12px;margin-bottom:10px"><div class="q-num">03</div><div class="q-text">Describe a moment you managed multiple urgent priorities.</div></div><div class="q-tip">Show a real system — not just "I work well under pressure." Mention weekly planning, stakeholder communication, how you made the call on what to prioritise first.</div></div>
+        <div class="dl-row">
+          <button class="dl-btn pdf" onclick="downloadPDF('prep')"><span class="dl-icon">📄</span> Download PDF</button>
+          <button class="dl-btn word" onclick="downloadWord('prep')"><span class="dl-icon">📝</span> Download Word</button>
+          <button class="dl-btn" onclick="downloadMD('prep')"><span class="dl-icon">📋</span> Download MD</button>
+        </div>
+      </div>
+
+      <div class="panel" id="prep-tech" style="display:none">
+        <div class="ph"><div class="pt">Technical Questions</div></div>
+        <div class="q-block"><div style="display:flex;gap:12px;margin-bottom:10px"><div class="q-num">01</div><div class="q-text">What experience do you have with CIPC compliance?</div></div><div class="q-tip">Name specifics: new registrations, annual returns, director amendments, B-BBEE affidavits. Practitioners name things — that's what separates a real expert from someone who Googled it.</div></div>
+        <div class="q-block"><div style="display:flex;gap:12px;margin-bottom:10px"><div class="q-num">02</div><div class="q-text">What government funding programmes do you know?</div></div><div class="q-tip">SEDA (non-financial support), SEFA (R50k–R15m loans), NEF (equity), DSBD, dtic, NYDA. Briefly explain each. Don't just list acronyms — explain what each does and who it's for.</div></div>
+        <div class="q-block"><div style="display:flex;gap:12px;margin-bottom:10px"><div class="q-num">03</div><div class="q-text">How would you run a One-Stop Business Support Centre?</div></div><div class="q-tip">This is your strongest question — you've done it. Cover intake, referrals, record management, reporting. Then add: proactive outreach to entrepreneurs who don't know the centre exists.</div></div>
+        <div class="dl-row">
+          <button class="dl-btn pdf" onclick="downloadPDF('prep')"><span class="dl-icon">📄</span> Download PDF</button>
+          <button class="dl-btn word" onclick="downloadWord('prep')"><span class="dl-icon">📝</span> Download Word</button>
+          <button class="dl-btn" onclick="downloadMD('prep')"><span class="dl-icon">📋</span> Download MD</button>
+        </div>
+      </div>
+
+      <div class="panel" id="prep-sit" style="display:none">
+        <div class="ph"><div class="pt">Situational Questions</div></div>
+        <div class="q-block"><div style="display:flex;gap:12px;margin-bottom:10px"><div class="q-num">01</div><div class="q-text">12 entrepreneurs are waiting, 3 have urgent issues. What do you do?</div></div><div class="q-tip">Triage. Acknowledge everyone first. Handle urgent compliance issues first. Schedule the rest with specific times. Document everything. Show calm under volume.</div></div>
+        <div class="q-block"><div style="display:flex;gap:12px;margin-bottom:10px"><div class="q-num">02</div><div class="q-text">A key funding partner pulls out 2 weeks before a workshop.</div></div><div class="q-tip">Show calm: assess the gap, communicate immediately with all stakeholders, name 2–3 backup partners you'd call. SEDA, NEF, local chamber. Always have a plan B.</div></div>
+        <div class="q-block"><div style="display:flex;gap:12px;margin-bottom:10px"><div class="q-num">03</div><div class="q-text">How would you reach entrepreneurs in rural areas who don't know UMDA exists?</div></div><div class="q-tip">Community radio, taxi ranks, traditional leaders, stokvels, churches, local schools. Show you understand the geography of uMkhanyakude — not just a generic answer.</div></div>
+        <div class="dl-row">
+          <button class="dl-btn pdf" onclick="downloadPDF('prep')"><span class="dl-icon">📄</span> Download PDF</button>
+          <button class="dl-btn word" onclick="downloadWord('prep')"><span class="dl-icon">📝</span> Download Word</button>
+          <button class="dl-btn" onclick="downloadMD('prep')"><span class="dl-icon">📋</span> Download MD</button>
+        </div>
+      </div>
+
+      <div class="panel" id="prep-close" style="display:none">
+        <div class="ph"><div class="pt">How to Close the Interview</div></div>
+        <div class="q-block"><div class="q-text" style="margin-bottom:10px">"What does success look like in the first 90 days in this role?"</div><div class="q-tip">Signals leadership thinking — you're already thinking about impact, not just getting the job.</div></div>
+        <div class="q-block"><div class="q-text" style="margin-bottom:10px">"What are the biggest challenges SMMEs in uMkhanyakude currently face?"</div><div class="q-tip">Shows you've thought beyond the job spec. It turns the interview into a conversation.</div></div>
+        <div class="q-block"><div class="q-text" style="margin-bottom:10px">"Is there anything in my application you'd like me to clarify?"</div><div class="q-tip">Opens the door for any concerns — lets you address the degree gap or anything else directly.</div></div>
+        <div style="background:var(--gold-dim);border:1px solid rgba(184,154,62,0.2);border-radius:4px;padding:16px;margin-top:4px">
+          <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px">Before you leave</div>
+          <div style="font-size:12px;color:var(--ink-lt);line-height:1.6">Thank each panel member by name. Confirm next steps and timeline. Ask for a business card. Send your referees (Ms. Thobile Nxumalo, Mr. Bahle Magwaza) a heads-up WhatsApp before Monday — they may be called.</div>
+        </div>
+        <div class="dl-row">
+          <button class="dl-btn pdf" onclick="downloadPDF('prep')"><span class="dl-icon">📄</span> Full Prep PDF</button>
+          <button class="dl-btn word" onclick="downloadWord('prep')"><span class="dl-icon">📝</span> Full Prep Word</button>
+          <button class="dl-btn" onclick="downloadMD('prep')"><span class="dl-icon">📋</span> Full Prep MD</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ BRAND BUILDER ═══════════════ -->
+    <section class="page" id="page-brand">
+      <div class="plat-grid">
+        <div class="plat-card">
+          <div class="plat-icon">💼</div>
+          <div class="plat-name">LinkedIn</div>
+          <div class="plat-desc">Professional networking, recruiter visibility, thought leadership. Best for corporate and government roles in LED and enterprise development.</div>
+          <div class="plat-bar-row"><div class="plat-bar"><div class="plat-fill" style="width:62%"></div></div><span class="plat-pct">62%</span></div>
+          <button class="btn-p" style="margin-top:18px;width:100%;font-size:9px">Optimise Profile</button>
+        </div>
+        <div class="plat-card">
+          <div class="plat-icon">📰</div>
+          <div class="plat-name">Substack</div>
+          <div class="plat-desc">Build a professional newsletter around your expertise in enterprise development and compliance. Attract inbound opportunities and establish authority.</div>
+          <div class="plat-bar-row"><div class="plat-bar"><div class="plat-fill" style="width:35%"></div></div><span class="plat-pct">35%</span></div>
+          <button class="btn-p" style="margin-top:18px;width:100%;font-size:9px">Set Up Newsletter</button>
+        </div>
+        <div class="plat-card">
+          <div class="plat-icon">🎵</div>
+          <div class="plat-name">TikTok</div>
+          <div class="plat-desc">Build in public while you job hunt. Some candidates land roles faster through visibility than through applications alone. Career content, expertise-led videos.</div>
+          <div class="plat-bar-row"><div class="plat-bar"><div class="plat-fill" style="width:0%"></div></div><span class="plat-pct">0%</span></div>
+          <button class="btn-p" style="margin-top:18px;width:100%;font-size:9px">Start Building</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph">
+          <div><div class="pt">Content Calendar</div><div class="ps">AI-generated · tailored to your profile</div></div>
+          <button class="btn-p" style="padding:8px 14px;font-size:9px">Generate More</button>
+        </div>
+        <div class="ci"><div class="ci-ico c-li">💼</div><div><div class="ci-t">'5 things I wish someone told me before my first SMME compliance workshop'</div><div class="ci-m">LinkedIn Article · <span style="color:var(--gold)">Schedule Mon</span></div></div></div>
+        <div class="ci"><div class="ci-ico c-ss">📰</div><div><div class="ci-t">What enterprise development really looks like in rural KZN</div><div class="ci-m">Substack Newsletter · <span style="color:var(--gold)">Schedule Wed</span></div></div></div>
+        <div class="ci"><div class="ci-ico c-tt">🎵</div><div><div class="ci-t">Day in my life as an enterprise development officer — 60s reel</div><div class="ci-m">TikTok Video · <span style="color:var(--gold)">Schedule Fri</span></div></div></div>
+        <div class="ci"><div class="ci-ico c-li">💼</div><div><div class="ci-t">How I helped 80+ SMMEs formalise — what I actually learned</div><div class="ci-m">LinkedIn Post · <span style="color:var(--gold)">Next Mon</span></div></div></div>
+        <div class="ci"><div class="ci-ico c-ss">📰</div><div><div class="ci-t">The CIPC process nobody explains — a plain-language guide</div><div class="ci-m">Substack · <span style="color:var(--gold)">Next Wed</span></div></div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">Generate Content</div></div>
+        <div class="form-row">
+          <div><label class="lbl">Platform</label><select class="inp" style="cursor:pointer"><option>LinkedIn</option><option>Substack</option><option>TikTok</option></select></div>
+          <div><label class="lbl">Content Type</label><select class="inp" style="cursor:pointer"><option>Post</option><option>Article / Essay</option><option>Newsletter</option><option>Video Script</option></select></div>
+        </div>
+        <div style="margin-bottom:14px"><label class="lbl">Topic or experience to draw from</label><textarea class="inp" rows="3" style="resize:none" placeholder="e.g. 'Helping SMMEs navigate CIPC in rural KZN — what actually trips people up'"></textarea></div>
+        <button class="btn-p">Generate with AI</button>
+      </div>
+    </section>
+
+    <!-- ═══════════════ PROFILE ═══════════════ -->
+    <section class="page" id="page-profile">
+      <div class="prof-banner">
+        <div class="prof-av">NB</div>
+        <div style="flex:1">
+          <div class="prof-name">Ncamisile Nokuzola Buthelezi</div>
+          <div class="prof-role">SMME Officer · Enterprise Development Specialist</div>
+          <div class="prof-tags">
+            <span class="prof-tag">KwaDukuza, KZN</span>
+            <span class="prof-tag">5+ Years</span>
+            <span class="prof-tag">Code 10</span>
+            <span class="prof-tag">NQF Level 6</span>
+            <span class="prof-tag">CIPC Specialist</span>
+          </div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div>
+          <div class="panel">
+            <div class="ph"><div class="pt">Living CV</div><span class="chip chip-grn">Active</span></div>
+            <div style="font-size:12px;color:var(--ink-lt);line-height:1.7;margin-bottom:16px">Your CV improves as you add wins. K8Jobs optimises it automatically for every application.</div>
+            <label class="lbl">Add a Work Win</label>
+            <textarea class="inp" rows="3" style="resize:none;margin-bottom:14px" placeholder="e.g. 'Coordinated a capacity-building workshop for 45 entrepreneurs covering CIPC registration...'"></textarea>
+            <button class="btn-p">Update CV</button>
+            <div class="dl-row">
+              <button class="dl-btn pdf" onclick="downloadPDF('cv')"><span class="dl-icon">📄</span> CV PDF</button>
+              <button class="dl-btn word" onclick="downloadWord('cv')"><span class="dl-icon">📝</span> CV Word</button>
+              <button class="dl-btn" onclick="downloadMD('cv')"><span class="dl-icon">📋</span> CV MD</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="ph"><div class="pt">Cover Letter</div><span class="chip chip-g">UMDA</span></div>
+            <div style="font-size:12px;color:var(--ink-lt);line-height:1.7;margin-bottom:16px">Personalised cover letter for UMhlosinga Development Agency — SMME Officer post. Addresses the qualification gap and highlights Code 10 as an added advantage.</div>
+            <div class="dl-row">
+              <button class="dl-btn pdf" onclick="downloadPDF('cl')"><span class="dl-icon">📄</span> Letter PDF</button>
+              <button class="dl-btn word" onclick="downloadWord('cl')"><span class="dl-icon">📝</span> Letter Word</button>
+              <button class="dl-btn" onclick="downloadMD('cl')"><span class="dl-icon">📋</span> Letter MD</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="ph"><div class="pt">Qualifications</div></div>
+            <div style="padding:12px 0;border-bottom:1px solid var(--line)"><div style="font-size:13px;font-weight:500;color:var(--ink)">National Diploma: Public Management</div><div style="font-size:11px;color:var(--ink-ft);margin-top:2px">Umfolozi TVET College · NQF Level 6 · 2022</div></div>
+            <div style="padding:12px 0;border-bottom:1px solid var(--line)"><div style="font-size:13px;font-weight:500;color:var(--ink)">National Diploma: Tourism</div><div style="font-size:11px;color:var(--ink-ft);margin-top:2px">Coastal TVET College · 2020</div></div>
+            <div style="padding:12px 0"><div style="font-size:13px;font-weight:500;color:var(--ink)">National Senior Certificate</div><div style="font-size:11px;color:var(--ink-ft);margin-top:2px">Embizweni High School · 2009</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel">
+            <div class="ph"><div class="pt">Documents</div></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;min-height:48px" onclick="downloadWord('cv')">
+              <span style="font-size:18px">📄</span><div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--ink)">Optimised CV</div><div style="font-size:11px;color:var(--ink-ft)">Updated today</div></div><span style="font-size:11px;color:var(--gold)">↓</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;min-height:48px" onclick="downloadWord('cl')">
+              <span style="font-size:18px">📝</span><div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--ink)">Cover Letter — UMDA</div><div style="font-size:11px;color:var(--ink-ft)">Updated today</div></div><span style="font-size:11px;color:var(--gold)">↓</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;min-height:48px" onclick="downloadPDF('prep')">
+              <span style="font-size:18px">🎤</span><div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--ink)">Interview Prep Pack</div><div style="font-size:11px;color:var(--ink-ft)">UMDA · Monday 11am</div></div><span style="font-size:11px;color:var(--gold)">↓</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;min-height:48px">
+              <span style="font-size:18px">🪪</span><div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--ink)">ID Document</div><div style="font-size:11px;color:var(--ink-ft)">Verified</div></div><span class="chip chip-grn">✓</span>
+            </div>
+            <button class="btn-o" style="width:100%;margin-top:12px;font-size:9px">+ Upload Document</button>
+          </div>
+          <div class="panel">
+            <div class="ph"><div class="pt">Career Stats</div></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)"><span style="font-size:12px;color:var(--ink-lt)">Applications sent</span><span style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--ink)">4</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)"><span style="font-size:12px;color:var(--ink-lt)">Interview rate</span><span style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--ink)">25%</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)"><span style="font-size:12px;color:var(--ink-lt)">CV health score</span><span style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--ink)">74/100</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)"><span style="font-size:12px;color:var(--ink-lt)">Jobs matched</span><span style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--ink)">12</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0"><span style="font-size:12px;color:var(--ink-lt)">Cold leads watching</span><span style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--ink)">5</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ PRICING ═══════════════ -->
+    <section class="page" id="page-pricing">
+      <div class="pricing-hero">
+        <div class="pricing-tag">Transparent Pricing</div>
+        <div class="pricing-title">Invest in your career.<br>Pay when it pays off.</div>
+        <div class="pricing-sub">Built for South African job seekers. Cancel anytime. No hidden fees. Annual plans save 2 months.</div>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="tier">
+          <div class="tier-eye">Free</div>
+          <div class="tier-price">R0</div>
+          <div class="tier-period">forever</div>
+          <div class="tier-feats">
+            <div class="tier-feat">Profile + CV upload</div>
+            <div class="tier-feat">3 job matches per month</div>
+            <div class="tier-feat">Basic dashboard</div>
+            <div class="tier-feat">K8Jobs community access</div>
+          </div>
+          <button class="tier-cta">Get Started</button>
+        </div>
+
+        <div class="tier">
+          <div class="tier-eye">Seeker</div>
+          <div class="tier-price">R79</div>
+          <div class="tier-period">per month · R790/year</div>
+          <div class="tier-feats">
+            <div class="tier-feat">Unlimited job matches</div>
+            <div class="tier-feat">Job pipeline tracker</div>
+            <div class="tier-feat">1 CV optimisation/month</div>
+            <div class="tier-feat">Basic interview prep</div>
+            <div class="tier-feat">Email job alerts</div>
+          </div>
+          <button class="tier-cta">Start Seeker</button>
+        </div>
+
+        <div class="tier recommended">
+          <div class="rec-badge">Most Popular</div>
+          <div class="tier-eye">Pro</div>
+          <div class="tier-price">R199</div>
+          <div class="tier-period">per month · R1,990/year</div>
+          <div class="tier-feats">
+            <div class="tier-feat">Everything in Seeker</div>
+            <div class="tier-feat">Living CV — continuous</div>
+            <div class="tier-feat">Cold Leads CRM (20)</div>
+            <div class="tier-feat">Brand Builder (LinkedIn + Substack + TikTok)</div>
+            <div class="tier-feat">AI content — 15/month</div>
+            <div class="tier-feat">Full interview prep suite</div>
+            <div class="tier-feat">WhatsApp alerts via Twilio</div>
+            <div class="tier-feat">Advisory Office priority referral</div>
+          </div>
+          <button class="tier-cta">Start Pro</button>
+        </div>
+
+        <div class="tier">
+          <div class="tier-eye">Executive</div>
+          <div class="tier-price">R399</div>
+          <div class="tier-period">per month · R3,990/year</div>
+          <div class="tier-feats">
+            <div class="tier-feat">Everything in Pro</div>
+            <div class="tier-feat">1 coaching call/month (30 min)</div>
+            <div class="tier-feat">Unlimited AI content</div>
+            <div class="tier-feat">Unlimited Cold Leads</div>
+            <div class="tier-feat">Application automation (beta)</div>
+            <div class="tier-feat">Direct recruiter introductions</div>
+          </div>
+          <button class="tier-cta">Start Executive</button>
+        </div>
+      </div>
+
+      <div class="bundles-title">One-time Bundles</div>
+      <div class="bundle-grid">
+        <div class="bundle">
+          <div><div class="bun-name">Quick Start Bundle</div><div class="bun-inc">CV optimisation + Cover letter + Basic prep</div></div>
+          <div><div class="bun-price">R149</div><div class="bun-once">once-off</div></div>
+        </div>
+        <div class="bundle">
+          <div><div class="bun-name">Full Application Pack</div><div class="bun-inc">CV + Cover letter + Full prep + 3 months job matching</div></div>
+          <div><div class="bun-price">R299</div><div class="bun-once">once-off</div></div>
+        </div>
+      </div>
+
+      <div class="advisory-pricing">
+        <div class="ap-title">The Advisory Office — Compliance Services</div>
+        <div class="ap-sub">Referred via K8Jobs Pro &amp; Executive. Fixed fees, no surprises.</div>
+        <div class="ap-grid">
+          <div class="ap-item"><div class="ap-service">CIPC Registration</div><div class="ap-price">R450</div></div>
+          <div class="ap-item"><div class="ap-service">Tax Clearance</div><div class="ap-price">R350</div></div>
+          <div class="ap-item"><div class="ap-service">B-BBEE Affidavit</div><div class="ap-price">R350</div></div>
+          <div class="ap-item"><div class="ap-service">Full Compliance Bundle</div><div class="ap-price">R1,200</div></div>
+        </div>
+        <div class="ap-note">K8Jobs earns a 15% referral fee on all Advisory Office transactions from referred clients.</div>
+      </div>
+
+      <div class="panel" style="margin-top:16px;background:var(--cream-lt)">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;text-align:center">
+          <div style="padding:16px 12px;border-right:1px solid var(--line)"><div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--ink)">R107k</div><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-ft);margin-top:4px">Yr 1 Revenue Potential</div></div>
+          <div style="padding:16px 12px;border-right:1px solid var(--line)"><div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--ink)">50</div><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-ft);margin-top:4px">Paying Users to Break Even</div></div>
+          <div style="padding:16px 12px"><div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--ink)">R30k+</div><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-ft);margin-top:4px">Monthly at 200 Users</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ ADVISORY ═══════════════ -->
+    <section class="page" id="page-advisory">
+      <div class="adv-block">
+        <div class="adv-eye">K8Jobs Partner</div>
+        <div class="adv-title">The Advisory Office</div>
+        <div class="adv-body">Expert business compliance and regulatory services for entrepreneurs and professionals across South Africa. K8Jobs clients receive a priority referral — your profile is shared with their intake team before you arrive.</div>
+        <div class="adv-tags">
+          <span class="adv-tag">CIPC Registration</span><span class="adv-tag">Annual Returns</span>
+          <span class="adv-tag">Tax Clearance</span><span class="adv-tag">B-BBEE Affidavit</span>
+          <span class="adv-tag">Business Structuring</span><span class="adv-tag">Funding Applications</span>
+          <span class="adv-tag">Regulatory Compliance</span>
+        </div>
+        <button class="btn-cream">Request a Referral</button>
+      </div>
+      <div class="three-col">
+        <div class="panel" style="margin-bottom:0">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--ink);margin-bottom:4px">5–7</div>
+          <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">working days</div>
+          <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px">Fast turnaround</div>
+          <div style="font-size:11px;color:var(--ink-ft)">Urgent requests accommodated on request.</div>
+        </div>
+        <div class="panel" style="margin-bottom:0">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--ink);margin-bottom:4px">Priority</div>
+          <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">K8Jobs clients</div>
+          <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px">Skip the queue</div>
+          <div style="font-size:11px;color:var(--ink-ft)">The Advisory Office is briefed before you arrive.</div>
+        </div>
+        <div class="panel" style="margin-bottom:0">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--ink);margin-bottom:4px">Fixed</div>
+          <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">pricing</div>
+          <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:4px">No hidden costs</div>
+          <div style="font-size:11px;color:var(--ink-ft)">All fees disclosed upfront before any commitment.</div>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- /main -->
+</div><!-- /app -->
+
+<!-- BOTTOM NAV -->
+<nav id="bottom-nav">
+  <button class="bn active" data-page="dashboard" onclick="go('dashboard')"><div class="bn-icon">🏠</div><div class="bn-label">Home</div></button>
+  <button class="bn" data-page="pipeline" onclick="go('pipeline')"><div class="bn-icon">📋</div><div class="bn-label">Pipeline</div></button>
+  <button class="bn" data-page="prep" onclick="go('prep')"><div class="bn-icon">🎤</div><div class="bn-label">Prep</div></button>
+  <button class="bn" data-page="brand" onclick="go('brand')"><div class="bn-icon">✨</div><div class="bn-label">Brand</div></button>
+  <button class="bn" data-page="pricing" onclick="go('pricing')"><div class="bn-icon">💳</div><div class="bn-label">Pricing</div></button>
+</nav>
+
+<script>
+// ── NAVIGATION ─────────────────────────────────────────────────────────────
+const PAGE_TITLES = {
+  dashboard:"Good morning, <em>Ncamisile</em>",
+  pipeline:"Job Pipeline",leads:"Cold Leads",prep:"Interview Preparation",
+  brand:"Brand Builder",profile:"My Profile",pricing:"Pricing",advisory:"The Advisory Office"
+};
+
+function go(page){
+  // Pages
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('page-'+page);
+  if(el){el.classList.add('active');el.scrollTop=0}
+  // Sidebar nav
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.page===page);
+  });
+  // Bottom nav
+  document.querySelectorAll('.bn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.page===page);
+  });
+  // Title
+  document.getElementById('tb-title').innerHTML=PAGE_TITLES[page]||page;
+  // Close sidebar on mobile
+  closeSidebar();
+  window.scrollTo(0,0);
+}
+
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── COLD LEADS FILTER ─────────────────────────────────────────────────────
+function filterLeads(status,btn){
+  document.querySelectorAll('#page-leads .fb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#leads-list .lead-row').forEach(row=>{
+    row.style.display=(status==='all'||row.dataset.status===status)?'flex':'none';
+  });
+}
+
+// ── PREP TAB FILTER ────────────────────────────────────────────────────────
+function filterPrep(tab,btn){
+  document.querySelectorAll('#page-prep .fb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['beh','tech','sit','close'].forEach(t=>{
+    const el=document.getElementById('prep-'+t);
+    if(el) el.style.display=(t===tab)?'block':'none';
+  });
+}
+
+// ── DOCUMENT CONTENT ───────────────────────────────────────────────────────
+const DOCS = {
+  prep:{
+    title:"K8Jobs Interview Preparation Pack",
+    subtitle:"Ncamisile Nokuzola Buthelezi · SMME Officer · UMhlosinga Development Agency",
+    date:"May 2026 · Monday at 11:00 · Mkuze Airport Workstation, Mtubatuba",
+    sections:[
+      {heading:"Match Overview",body:"CV Match Score: 88% | 5+ years experience (vs 2–3 required) | CIPC compliance ✓ | Code 10 licence ✓ | One-Stop Centre experience ✓"},
+      {heading:"Know UMDA",body:"UMhlosinga Development Agency (UMDA) is wholly owned by uMkhanyakude District Municipality. Their mandate is sustainable economic growth for local communities. CEO: Ms. Thembisile C. Khumalo. Workstation: Mkuze Airport — district-wide outreach role."},
+      {heading:"Handling the Qualification Question",body:"The post asks for a Bachelor's Degree. You hold a National Diploma (NQF 6). Own it confidently: 'I hold a National Diploma in Public Management at NQF Level 6 — equivalent academic level. I've spent over five years doing exactly this job. I'm also exploring further studies to formalise what I've built in practice.' Do NOT apologise. State it once and move forward."},
+      {heading:"Behavioural Questions",body:"Q1: Tell us about yourself. ANSWER: Open with impact — '5 years on the ground, 80+ SMMEs supported, now ready to do it at scale in uMkhanyakude.'\n\nQ2: Time you helped an SMME access funding. ANSWER: Name the programme (SEFA/SEDA/DSBD). Use STAR: Situation → Task → Action → Result. Have 2–3 real examples.\n\nQ3: Managing multiple urgent priorities. ANSWER: Show a real system — weekly planning, triage, stakeholder communication."},
+      {heading:"Technical Questions",body:"Q1: CIPC compliance experience. ANSWER: Name specifics — new registrations, annual returns, director amendments, B-BBEE affidavits.\n\nQ2: Government funding programmes. ANSWER: SEDA (non-financial), SEFA (loans R50k–R15m), NEF (equity), DSBD, dtic, NYDA. Explain what each does.\n\nQ3: Running a One-Stop Centre. ANSWER: You've done it — cover intake, referrals, record management, reporting, proactive outreach."},
+      {heading:"Situational Questions",body:"Q1: 12 entrepreneurs waiting, 3 urgent. ANSWER: Triage. Acknowledge everyone. Handle urgent compliance first. Schedule the rest.\n\nQ2: Funding partner pulls out 2 weeks before workshop. ANSWER: Assess gap, communicate immediately, name backup partners (SEDA, NEF, local chamber).\n\nQ3: Reaching rural entrepreneurs who don't know UMDA exists. ANSWER: Community radio, taxi ranks, traditional leaders, stokvels, churches — show you understand uMkhanyakude's geography."},
+      {heading:"How to Close the Interview",body:"Ask one of these:\n— 'What does success look like in the first 90 days?'\n— 'What are the biggest challenges SMMEs in uMkhanyakude currently face?'\n— 'Is there anything in my application you'd like me to clarify?'\n\nBefore you leave: Thank each panel member by name. Confirm next steps. WhatsApp your referees (Ms. Thobile Nxumalo, Mr. Bahle Magwaza) before Monday."},
+      {heading:"Checklist — What to Bring",body:"☐ Certified copy of ID\n☐ Certified copies of both qualifications (NQF 6 + Tourism)\n☐ Certified copy of driver's licence (Code 10)\n☐ 3 copies of optimised CV\n☐ 3 copies of cover letter\n☐ Completed Z83 form (www.umda.org.za)\n☐ Reference letters from Ms. Nxumalo and Mr. Magwaza"}
+    ]
+  },
+  cv:{
+    title:"NCAMISILE NOKUZOLA BUTHELEZI",
+    subtitle:"SMME Officer | Enterprise Development Specialist",
+    date:"KwaDukuza, KwaZulu-Natal | 063 566 0916 | ncamzab@gmail.com | Code 10",
+    sections:[
+      {heading:"Professional Summary",body:"Enterprise Development and LED professional with over 5 years of hands-on experience supporting SMMEs across the iLembe District — exceeding the 2–3 years required for most senior roles. Currently managing business compliance facilitation (CIPC, tax clearance), One-Stop Business Support Centre operations, and stakeholder engagement at Enterprise iLembe. Track record of coordinating capacity-building programmes, facilitating funding access through SEDA/SEFA-linked channels, and delivering measurable outcomes for emerging entrepreneurs. Deeply committed to inclusive economic growth in under-served communities across KwaZulu-Natal."},
+      {heading:"Key Achievements",body:"• Directly supported 80+ SMMEs with business compliance, funding access, and formalisation across iLembe District\n• Coordinated capacity-building workshops serving 50+ entrepreneurs per quarter through SEDFA and Enterprise iLembe\n• Streamlined One-Stop Business Support Centre operations — reducing client administrative bottlenecks\n• Facilitated SEDA/SEFA referrals resulting in multiple SMEs accessing government-backed development finance\n• Coordinated business exhibitions connecting local SMMEs with investors and development partners"},
+      {heading:"Work Experience",body:"OFFICE ADMINISTRATOR — SMME & Enterprise Development | Aug 2023–Present [Contract]\nEnterprise iLembe Economic Development Agency\n• Deliver direct business support to SMMEs — compliance, growth strategy, formalisation\n• Facilitate CIPC registrations, tax clearance, and sector-specific regulatory compliance\n• Manage One-Stop Business Support Centre daily operations\n• Identify government funding opportunities and assist SMMEs with applications\n• Organise and facilitate capacity-building workshops and stakeholder engagements\n\nOPERATIONS ADMINISTRATOR | May 2022–Jan 2023\nSmall Enterprise Development and Finance Agency (SEDFA)\n• Coordinated training workshops for SMMEs in agriculture and tourism\n• Maintained databases and progress reports for enterprise development programmes\n• Collaborated with LED officers to improve service delivery to co-operatives\n\nHR & ADMINISTRATION INTERN | Nov 2019–Dec 2020\nEnterprise iLembe Economic Development Agency\n• Supported bid and procurement processes\n• Maintained personnel and procurement records\n\nTOURISM & MARKETING TRAINEE | Mar 2018–Oct 2019\nEnterprise iLembe Economic Development Agency\n• Promoted local tourism assets and coordinated community events"},
+      {heading:"Education",body:"National Diploma: Public Management (NQF Level 6)\nUmfolozi TVET College · Completed 2022\n\nNational Diploma: Tourism\nCoastal TVET College · Completed 2020\n\nNational Senior Certificate\nEmbizweni High School · 2009"},
+      {heading:"Core Competencies",body:"SMME Business Support | CIPC & Regulatory Compliance | Government Funding Access\nStakeholder Engagement | Programme Coordination | Capacity-Building Facilitation\nRecords & Document Management | Event Planning | MS Office · e-Filing · Databases"},
+      {heading:"References",body:"Ms. Thobile Nxumalo — Executive Manager: Strategy, Enterprise iLembe | 082 468 5868 | thobile@enterpriseilembe.co.za\n\nMr. Bahle Jeffrey Magwaza — Former Executive Manager: Projects, Enterprise iLembe | 060 975 1980\n\nMr. Ndumiso Ncama — Information Officer, SEDA | 063 494 4163 | nncama@seda.org.za"}
+    ]
+  },
+  cl:{
+    title:"COVER LETTER — SMME OFFICER",
+    subtitle:"POST NO. 01/2025/26 | UMhlosinga Development Agency",
+    date:"21 April 2026 | Ncamisile Nokuzola Buthelezi | ncamzab@gmail.com | 063 566 0916",
+    sections:[
+      {heading:"To",body:"The Hiring Manager\nUMhlosinga Development Agency SOC Limited (UMDA)\nLot 5/202, Corner of Jan Smuts Avenue and Aloe Street\nMtubatuba, 3935\n\nDear Ms. Khumalo and the Hiring Panel,"},
+      {heading:"Application",body:"RE: SMME OFFICER | POST NO. 01/2025/26\n\nI am writing to apply for the position of SMME Officer (Post No. 01/2025/26) based at Mkuze Airport, as advertised by UMhlosinga Development Agency. With over five years of direct experience in SMME support, enterprise development, and local economic development — significantly exceeding the 2–3 years required — I am confident in my ability to make an immediate and meaningful contribution to UMDA's mission of driving sustainable economic growth across uMkhanyakude District."},
+      {heading:"Relevant Experience",body:"In my current role at Enterprise iLembe Economic Development Agency, I provide frontline business support to SMMEs across the district — facilitating CIPC registrations, tax clearance processes, and sector-specific compliance requirements on a daily basis. I manage referrals to funding institutions including SEDA and SEFA-linked programmes, assist entrepreneurs with funding applications and proposal development, and coordinate the operational delivery of the One-Stop Business Support Centre. This experience maps directly to the responsibilities outlined in the UMDA job specification.\n\nPrior to this, I served as Operations Administrator at the Small Enterprise Development and Finance Agency (SEDFA), where I coordinated training and capacity-building workshops for SMMEs in agriculture and tourism — sectors central to the uMkhanyakude economic landscape."},
+      {heading:"Qualifications & Licence",body:"My National Diploma in Public Management (NQF Level 6) from Umfolozi TVET College has equipped me with a solid grounding in public administration, public finance, and development practice. Combined with my practical exposure to government support mechanisms and LED coordination, I bring both theoretical understanding and real-world delivery capability to this role.\n\nI hold a Code 10 driver's licence and am well-prepared to fulfil the mobility requirements of this position across the uMkhanyakude District."},
+      {heading:"Closing",body:"I am deeply passionate about local economic development and committed to empowering entrepreneurs in under-served communities to build sustainable livelihoods. UMDA's mandate resonates strongly with the work I do every day, and I would welcome the opportunity to bring that same energy and capability to your team.\n\nThank you for considering my application. I have enclosed my detailed CV and three contactable references as required. I look forward to the opportunity to discuss how I can contribute to UMDA's objectives.\n\nYours faithfully,\nNcamisile Nokuzola Buthelezi\nSMME Officer Applicant — POST NO. 01/2025/26\n063 566 0916 | ncamzab@gmail.com\n\nNote: Application submitted hand-delivery to Lot 5/202, Corner of Jan Smuts Avenue and Aloe Street, Mtubatuba 3935 | Closing date: 30 April 2026 at 12:00"}
+    ]
+  }
+};
+
+// ── MARKDOWN DOWNLOAD ─────────────────────────────────────────────────────
+function downloadMD(type){
+  const doc=DOCS[type];
+  let md=`# ${doc.title}\n**${doc.subtitle}**\n_${doc.date}_\n\n`;
+  doc.sections.forEach(s=>{md+=`## ${s.heading}\n\n${s.body}\n\n`});
+  md+=`\n---\n_Prepared by K8Jobs · A Kwahlelwa Group Product · Pietermaritzburg, KZN · ${new Date().getFullYear()}_\n`;
+  const fname={prep:'K8Jobs_InterviewPrep_Buthelezi',cv:'Ncamisile_CV_Optimised',cl:'Ncamisile_CoverLetter_UMDA'}[type];
+  triggerDownload(new Blob([md],{type:'text/markdown'}),fname+'.md');
+}
+
+// ── WORD DOWNLOAD ─────────────────────────────────────────────────────────
+function downloadWord(type){
+  const doc=DOCS[type];
+  let html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>${doc.title}</title><style>
+    body{font-family:Arial,sans-serif;font-size:11pt;color:#1A1917;margin:2cm}
+    h1{font-size:18pt;font-weight:bold;color:#0D1B2A;border-bottom:2px solid #B89A3E;padding-bottom:6pt;margin-bottom:4pt}
+    h2{font-size:13pt;font-weight:bold;color:#0D1B2A;margin-top:14pt;margin-bottom:4pt;border-bottom:1px solid #D8D2C4;padding-bottom:3pt}
+    p{font-size:11pt;line-height:1.5;margin-bottom:8pt;color:#3D3A35}
+    .sub{font-size:12pt;color:#B89A3E;margin-bottom:4pt}
+    .date{font-size:10pt;color:#9A9188;margin-bottom:16pt}
+    .footer{font-size:8pt;color:#9A9188;margin-top:24pt;border-top:1px solid #D8D2C4;padding-top:8pt}
+  </style></head><body>
+  <h1>${doc.title}</h1>
+  <p class='sub'>${doc.subtitle}</p>
+  <p class='date'>${doc.date}</p>`;
+  doc.sections.forEach(s=>{
+    html+=`<h2>${s.heading}</h2><p>${s.body.replace(/\n/g,'<br>')}</p>`;
+  });
+  html+=`<p class='footer'>Prepared by K8Jobs &middot; A Kwahlelwa Group Product &middot; Pietermaritzburg, KZN</p></body></html>`;
+  const fname={prep:'K8Jobs_InterviewPrep_Buthelezi',cv:'Ncamisile_CV_Optimised',cl:'Ncamisile_CoverLetter_UMDA'}[type];
+  triggerDownload(new Blob(['\ufeff'+html],{type:'application/msword'}),fname+'.doc');
+}
+
+// ── PDF DOWNLOAD ──────────────────────────────────────────────────────────
+function downloadPDF(type){
+  if(typeof window.jspdf==='undefined'&&typeof jspdf==='undefined'){
+    alert('PDF library loading... please try again in a moment.');return;
+  }
+  const {jsPDF}=window.jspdf||jspdf;
+  const doc2=DOCS[type];
+  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,M=20,CW=W-M*2;
+  let y=M;
+
+  // Header bar
+  pdf.setFillColor(13,27,42);
+  pdf.rect(0,0,W,36,'F');
+  pdf.setFillColor(184,154,62);
+  pdf.rect(0,36,W,1.2,'F');
+
+  pdf.setFont('helvetica','bold');
+  pdf.setFontSize(16);
+  pdf.setTextColor(234,229,217);
+  pdf.text(doc2.title,M,16);
+  pdf.setFont('helvetica','normal');
+  pdf.setFontSize(10);
+  pdf.setTextColor(184,154,62);
+  pdf.text(doc2.subtitle,M,24);
+  pdf.setTextColor(160,155,145);
+  pdf.setFontSize(8.5);
+  pdf.text(doc2.date,M,31);
+
+  y=48;
+
+  doc2.sections.forEach(sec=>{
+    // Section heading
+    if(y>262){pdf.addPage();y=M}
+    pdf.setFillColor(242,238,230);
+    pdf.rect(M,y-4,CW,9,'F');
+    pdf.setFont('helvetica','bold');
+    pdf.setFontSize(10);
+    pdf.setTextColor(13,27,42);
+    pdf.text(sec.heading.toUpperCase(),M+3,y+2.5);
+    y+=12;
+
+    // Body text
+    pdf.setFont('helvetica','normal');
+    pdf.setFontSize(9.5);
+    pdf.setTextColor(61,58,53);
+    const lines=pdf.splitTextToSize(sec.body,CW);
+    lines.forEach(line=>{
+      if(y>272){pdf.addPage();y=M}
+      pdf.text(line,M,y);
+      y+=5;
+    });
+    y+=4;
+  });
+
+  // Footer
+  const pages=pdf.internal.getNumberOfPages();
+  for(let i=1;i<=pages;i++){
+    pdf.setPage(i);
+    pdf.setFillColor(234,229,217);
+    pdf.rect(0,285,W,12,'F');
+    pdf.setFontSize(7.5);
+    pdf.setTextColor(154,145,136);
+    pdf.text('Prepared by K8Jobs · A Kwahlelwa Group Product · Pietermaritzburg, KZN',M,292);
+    pdf.text(`${i} / ${pages}`,W-M,292,'right');
+  }
+
+  const fname={prep:'K8Jobs_InterviewPrep_Buthelezi',cv:'Ncamisile_CV_Optimised',cl:'Ncamisile_CoverLetter_UMDA'}[type];
+  pdf.save(fname+'.pdf');
+}
+
+// ── TRIGGER DOWNLOAD ──────────────────────────────────────────────────────
+function triggerDownload(blob,filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+// ── ANIMATE PLATFORM BARS ─────────────────────────────────────────────────
+function animateBars(){
+  document.querySelectorAll('.plat-fill').forEach(bar=>{
+    const w=bar.style.width;
+    bar.style.width='0%';
+    setTimeout(()=>{bar.style.width=w},100);
+  });
+}
+
+// Observe brand page
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting&&e.target.id==='page-brand')animateBars()});
+},{threshold:0.1});
+const bp=document.getElementById('page-brand');
+if(bp)obs.observe(bp);
+
+// Init
+go('dashboard');
+</script>
+</body>
+</html>
